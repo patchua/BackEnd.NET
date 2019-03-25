@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace Service
 {
@@ -28,7 +29,10 @@ namespace Service
             //services.AddDbContext<Persistence>(cfg =>
             //    cfg.UseSqlServer(Configuration.GetConnectionString("DbConnection")));
             //services.AddTransient<DataSeeder>();
-            //services.AddSwagger();
+            services.AddSwaggerGen(cfg =>
+           cfg.SwaggerDoc("v1", new Info {
+               Title = "Prices API",
+               Version = "v1" }));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
@@ -43,7 +47,8 @@ namespace Service
             {
                 app.UseHsts();
             }
-
+            app.UseSwagger();
+            app.UseSwaggerUI(cfg => cfg.SwaggerEndpoint("/swagger/v1/swagger.json", "Prices API v1"));
             app.UseHttpsRedirection();
             app.UseMvc();
         }
