@@ -4,20 +4,21 @@ namespace DevChallenge.Domain
 {
     public class InstrumentPrice
     {
-        public InstrumentPrice(Portfolio portfolio, InstrumentOwner owner, Instrument instrument, TimeSlot date, decimal price)
+        public InstrumentPrice(string portfolio, string owner, string instrument, int timeSlot, decimal price)
         {
             Portfolio = portfolio ?? throw new ArgumentNullException(nameof(portfolio));
             InstrumentOwner = owner ?? throw new ArgumentNullException(nameof(owner));
             Instrument = instrument ?? throw new ArgumentNullException(nameof(instrument));
-            Date = date ?? throw new ArgumentNullException(nameof(date));
+            if(timeSlot<0) throw new ArgumentNullException(nameof(timeSlot));
+            TimeSlot = timeSlot;
             if (price <= 0) throw new ArgumentOutOfRangeException(nameof(price));
             Price = price;
         }
 
-        public Portfolio Portfolio { get; }
-        public InstrumentOwner InstrumentOwner { get; }
-        public Instrument Instrument { get; }
-        public TimeSlot Date { get; }
+        public string Portfolio { get; }
+        public string InstrumentOwner { get; }
+        public string Instrument { get; }
+        public int TimeSlot { get; }
         public decimal Price { get; }
     }
 }

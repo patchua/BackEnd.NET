@@ -5,7 +5,7 @@ namespace DevChallenge.Domain
     /// <summary>
     ///     Time slot is an interval of time from EpochStart in UTC
     /// </summary>
-    public class TimeSlot
+    public static class TimeSlot
     {
         /// <summary>
         ///     Length of one time slot in seconds
@@ -17,15 +17,16 @@ namespace DevChallenge.Domain
         /// </summary>
         public static readonly DateTime EpochStart = new DateTime(2018, 01, 01, 0, 0, 0, DateTimeKind.Utc);
 
-        public TimeSlot(DateTime time)
+        public static int DateTimeToTimeSlot(DateTime time)
         {
             if (time.Kind != DateTimeKind.Utc) throw new ArgumentOutOfRangeException(nameof(time));
             if (time < EpochStart) throw new ArgumentOutOfRangeException(nameof(time));
-            Number = (int) (time - EpochStart).TotalSeconds / 10000;
+            return  (int) (time - EpochStart).TotalSeconds / 10000;
         }
 
-        public int Number { get; }
-
-        public DateTime Start => EpochStart.AddSeconds(Number * SlotLength);
+        public static DateTime GetTimeSlotStartDate(int timeSlot)
+        {
+            return EpochStart.AddSeconds(timeSlot * SlotLength);
+        }
     }
 }
