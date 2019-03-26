@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Application;
 using Application.InstrumentPrices.Queries;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -32,6 +33,7 @@ namespace Service
             services.AddDbContextPool<DbService>(cfg =>
                 cfg.UseSqlServer(Configuration.GetConnectionString("DbConnection"), o => o.MigrationsAssembly(typeof(Startup).Assembly.FullName)));
             services.AddTransient<DbSeeder>();
+            services.AddScoped<IDBService, DbService>();
             services.AddScoped<IGetAveragePriceQuery, GetAveragePriceQuery>();
             services.AddLogging();    
             services.AddSwaggerGen(cfg =>

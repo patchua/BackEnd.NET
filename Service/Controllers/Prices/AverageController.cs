@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Application.InstrumentPrices.Queries;
@@ -9,10 +10,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Service.Controllers.Prices
 {
-    [Route("api/[controller]")]
+    [Route("api/prices/[controller]")]
     [ApiController]
     public class AverageController : ControllerBase
     {
+        private readonly string dateTimeFormat = "dd/MM/yyyy HH:mm:ss";
         private readonly IGetAveragePriceQuery _getAveragePriceQuery;
         private readonly ILogger<AverageController> _logger;
         public AverageController(IGetAveragePriceQuery getAveragePriceQuery, ILogger<AverageController> logger)
@@ -24,17 +26,19 @@ namespace Service.Controllers.Prices
         // GET: api/Average
         [HttpGet]
         public async Task<IActionResult> Get([FromQuery]string portfolio, [FromQuery]string instrument,
-            [FromQuery] string owner, [FromQuery]DateTime date)
+            [FromQuery] string owner, [FromQuery]string dateAsString)
         {
             if (portfolio == null)
                 return BadRequest();
             if (owner == null)
                 return BadRequest();
-            if (date == null)
+            if (dateAsString == null)
                 return BadRequest();
             if (instrument == null)
                 return BadRequest();
-
+            DateTime date;
+            if (!DateTime.TryParseExact(dateAsString, dateTimeFormat, null, DateTimeStyles.None, out date))
+                return BadRequest($"Invalid date format - {dateAsString}");
             try
             {
                 var average = await _getAveragePriceQuery.ExecuteAsync(date,instrument,owner,portfolio);

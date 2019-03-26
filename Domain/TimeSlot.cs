@@ -19,7 +19,6 @@ namespace DevChallenge.Domain
 
         public static int DateTimeToTimeSlot(DateTime time)
         {
-            if (time.Kind != DateTimeKind.Utc) throw new ArgumentOutOfRangeException(nameof(time));
             if (time < EpochStart) throw new ArgumentOutOfRangeException(nameof(time));
             return  (int) (time - EpochStart).TotalSeconds / 10000;
         }

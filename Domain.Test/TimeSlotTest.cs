@@ -7,17 +7,6 @@ namespace Domain.Tests
 {
     public class TimeSlotTest
     {
-        [Test]
-        public void DateTimeToTimeSlotWhenLocalTimePassedExceptionThrown()
-        {
-            Should.Throw<ArgumentOutOfRangeException>(() => TimeSlot. DateTimeToTimeSlot(new DateTime(2001, 1, 1, 10, 10, 10, DateTimeKind.Local)));
-        }
-
-        [Test]
-        public void DateTimeToTimeSlotWhenUnspecifiedTimePassedExceptionThrown()
-        {
-            Should.Throw<ArgumentOutOfRangeException>(() => TimeSlot.DateTimeToTimeSlot(new DateTime(2001, 1, 1, 10, 10, 10, DateTimeKind.Unspecified)));
-        }
 
         [Test]
         public void DateTimeToTimeSlotWhenTimeBeforeEpochStartPassedToCtorExceptionShouldBeThrown()
