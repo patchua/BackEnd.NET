@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Persistance;
 
 namespace Service
 {
@@ -14,7 +16,19 @@ namespace Service
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
+            IWebHost host=CreateWebHostBuilder(args).Build();
+            RunDBSeeder(host);
+            host.Run();
+        }
+
+        private static void RunDBSeeder(IWebHost host)
+        {
+            var scopeFactory = host.Services.GetService<IServiceScopeFactory>();
+            using (var scope = scopeFactory.CreateScope())
+            {
+                var seeder = scope.ServiceProvider.GetService<DbSeeder>();
+                seeder.Seed();
+            }
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>

@@ -4,20 +4,20 @@ using System.Text;
 using Application;
 using DevChallenge.Domain;
 using Microsoft.EntityFrameworkCore;
+using Persistance.InstrumentPrices;
 
 namespace Persistance
 {
     public class DbService : DbContext, IDBService
     {
+        public DbService(DbContextOptions<DbService> options) : base(options)
+        {
+        }
         public DbSet<InstrumentPrice> InstrumentPrices { get ; set ; }
 
-        public void Save()
+        public async void SaveAsync()
         {
-            this.SaveChangesAsync();
-        }
-        public DbService() : base()
-        {
-            Database.SetInitializer(new DatabaseInitializer());
+            await this.SaveChangesAsync();
         }
 
         public void Save()
@@ -29,10 +29,7 @@ namespace Persistance
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Configurations.Add(new CustomerConfiguration());
-            modelBuilder.Configurations.Add(new EmployeeConfiguration());
-            modelBuilder.Configurations.Add(new ProductConfiguration());
-            modelBuilder.Configurations.Add(new SaleConfiguration());
+            modelBuilder.ApplyConfiguration(new InstrumentPriceConfiguration());
         }
     }
 }
