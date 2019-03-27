@@ -10,47 +10,47 @@ using System.Globalization;
 using System.Runtime.InteropServices.ComTypes;
 using Microsoft.Extensions.Logging;
 using EFCore.BulkExtensions;
+using Microsoft.Extensions.Configuration;
 
 namespace Persistance
 {
     public class DbSeeder
     {
-        private readonly string format = "dd/MM/yyyy HH:mm:ss";
-        private readonly DbService dbService;
-        private readonly ILogger<DbSeeder> logger;
-        public DbSeeder(DbService service, ILogger<DbSeeder> logger) {
-            dbService = service?? throw new ArgumentNullException(nameof(service));
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly string _format;
+        private readonly DbService _dbService;
+        private readonly ILogger<DbSeeder> _logger;
+        private readonly string _file;
+        public DbSeeder(DbService service, ILogger<DbSeeder> logger, IConfiguration config) {
+            _dbService = service?? throw new ArgumentNullException(nameof(service));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _format = config.GetValue<string>("DateTimeFormat");
+            _file = config.GetValue<string>("DbSeedFile");
         }
         public void Seed()
         {
-            dbService.Database.EnsureCreated();
-            if (dbService.InstrumentPrices.AnyAsync().Result)
+            _dbService.Database.EnsureCreated();
+            if (_dbService.InstrumentPrices.AnyAsync().Result)
                 return;
-            var path = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase);
-            string filePath = path.Substring(6) + @"\data.csv";
+            var path = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase).Substring(6);
+            string filePath = Path.Combine(path,_file);
             if (File.Exists(filePath))
             {
                 var sw = new Stopwatch();
                 sw.Start();
                 var prices=ReadFromFile(filePath);
                 sw.Stop();
-                logger.LogInformation($"File processed in {sw.Elapsed.TotalMilliseconds} ms");
-                sw=new Stopwatch();
-                sw.Start();
+                _logger.LogInformation($"File processed in {sw.Elapsed.TotalMilliseconds} ms");
+                sw.Restart();
                 SaveToDb(prices);
                 sw.Stop();
-                logger.LogInformation($"Data saved to DB in {sw.Elapsed.TotalMilliseconds} ms");
+                _logger.LogInformation($"Data saved to DB in {sw.Elapsed.TotalMilliseconds} ms");
             }
         }
 
         private void SaveToDb(List<InstrumentPrice> prices)
         {
-            //dbService.ChangeTracker.AutoDetectChangesEnabled = false;
-            dbService.BulkInsert(prices);
-            //dbService.InstrumentPrices.AddRange(prices);
-            dbService.Save();
-            //dbService.ChangeTracker.AutoDetectChangesEnabled = true;
+            _dbService.BulkInsert(prices);
+            _dbService.Save();
         }
 
         private List<InstrumentPrice> ReadFromFile(string filePath)
@@ -67,7 +67,7 @@ namespace Persistance
                 var properties = line.Split(',');
                 if (Decimal.TryParse(properties[4], out price))
                 {
-                    if (DateTime.TryParseExact(properties[3],format,
+                    if (DateTime.TryParseExact(properties[3],_format,
                         CultureInfo.InvariantCulture,
                         DateTimeStyles.None,
                         out date))
@@ -79,19 +79,19 @@ namespace Persistance
                         }
                         catch (Exception e)
                         {
-                            logger.LogInformation(e,"");
+                            _logger.LogInformation(e,"");
                             continue;
                         }
                         
                     }
                     else
                     {
-                        logger.LogInformation($"Error parsing Date - {properties[3]}");
+                        _logger.LogInformation($"Error parsing Date - {properties[3]}");
                     }
                 }
                 else
                 {
-                    logger.LogInformation($"Error parsing Price - {properties[4]}");
+                    _logger.LogInformation($"Error parsing Price - {properties[4]}");
                 }
                 
             }

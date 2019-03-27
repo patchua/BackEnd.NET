@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using Persistance;
 using Swashbuckle.AspNetCore.Swagger;
 
@@ -30,6 +31,7 @@ namespace Service
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton(Configuration);
             services.AddDbContextPool<DbService>(cfg =>
                 cfg.UseSqlServer(Configuration.GetConnectionString("DbConnection"), o => o.MigrationsAssembly(typeof(Startup).Assembly.FullName)));
             services.AddTransient<DbSeeder>();
@@ -40,7 +42,15 @@ namespace Service
            cfg.SwaggerDoc("v1", new Info {
                Title = "Prices API",
                Version = "v1" }));
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+                .AddJsonOptions(Options =>
+                {
+                    Options.SerializerSettings.DateFormatString = Configuration.GetValue<string>("DateTimeFormat");
+                    Options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                    Options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

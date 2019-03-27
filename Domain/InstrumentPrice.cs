@@ -14,6 +14,7 @@ namespace DevChallenge.Domain
             TimeSlot = timeSlot;
             if (price <= 0) throw new ArgumentOutOfRangeException(nameof(price));
             Price = price;
+            Date = date;
         }
         private InstrumentPrice()
         { }   
